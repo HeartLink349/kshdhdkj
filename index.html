@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title id="site-title-tag">رمضان كريم ✨</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --bg-dark: #0B132B;
+            --gold: #F4C430;
+            --soft-white: #EAEAEA;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(244, 196, 48, 0.2);
+            --accent-glow: rgba(244, 196, 48, 0.25);
+            --danger: #ff4d4d;
+            --success: #00c851;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+        body { margin: 0; background: var(--bg-dark); color: var(--soft-white); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; height: 100vh; }
+
+        /* --- نجوم متحركة تتساقط (الخلفية) --- */
+        #stars-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+        /* --- زينة الواجهة (رقيقة وشيك) --- */
+        .intro-decoration {
+            position: absolute; top: 0; left: 0; width: 100%; height: 200px;
+            display: flex; justify-content: space-around; pointer-events: none; z-index: 10;
+        }
+        .dec-item {
+            display: flex; flex-direction: column; align-items: center;
+            animation: swingDec 5s infinite ease-in-out; transform-origin: top;
+        }
+        .dec-line { width: 0.5px; background: linear-gradient(to bottom, transparent, var(--gold)); opacity: 0.4; }
+        .dec-item i { 
+            color: var(--gold); 
+            filter: drop-shadow(0 0 5px var(--gold)); 
+            font-size: 15px; 
+            animation: glowPulse 3s infinite ease-in-out;
+        }
+
+        @keyframes swingDec { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+        @keyframes glowPulse { 0%, 100% { filter: drop-shadow(0 0 5px var(--gold)); opacity: 0.8; } 50% { filter: drop-shadow(0 0 15px var(--gold)); opacity: 1; } }
+
+        /* --- تأثيرات الظهور --- */
+        .reveal { 
+            opacity: 0; 
+            transform: translateY(40px) scale(0.95); 
+            filter: blur(10px);
+            transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1); 
+        }
+        .reveal.active { 
+            opacity: 1; 
+            transform: translateY(0) scale(1); 
+            filter: blur(0);
+        }
+
+        #page-1 {
+            height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle at center, #1c2541 0%, #0B132B 100%);
+            position: fixed; width: 100%; z-index: 999; 
+            transition: all 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+        
+        .login-card {
+            text-align: center; padding: 45px 20px; 
+            background: var(--glass); backdrop-filter: blur(20px); 
+            border-radius: 40px; border: 1px solid var(--glass-border);
+            width: 85%; max-width: 380px; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .intro-rhyme {
+            color: var(--gold); font-size: 15px; font-style: italic; margin: 15px auto 0;
+            line-height: 1.8; font-weight: 600; max-width: 280px;
+        }
+
+        #page-2 { 
+            display: none; opacity: 0; height: 100vh; overflow-y: auto; 
+            position: relative; z-index: 5; 
+            transition: all 1.5s cubic-bezier(0.7, 0, 0.3, 1);
+            transform: scale(1.1); filter: blur(10px);
+        }
+
+        .container { padding: 80px 20px 150px 20px; max-width: 450px; margin: 0 auto; text-align: center; }
+        .countdown-title { font-size: 26px; font-weight: 800; color: var(--soft-white); margin-bottom: 20px; }
+
+        .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 30px 0 50px; }
+        .timer-box { 
+            background: var(--glass); border: 1px solid var(--glass-border); 
+            padding: 18px 5px; border-radius: 24px; 
+            backdrop-filter: blur(10px); box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .timer-num { display: block; font-size: 26px; font-weight: 900; color: var(--gold); text-shadow: 0 0 15px var(--accent-glow); }
+
+        .main-img-box { width: 100%; border-radius: 35px; overflow: hidden; border: 1px solid var(--glass-border); margin-bottom: 50px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .main-img-box img { width: 100%; display: block; transition: transform 0.8s; }
+
+        .music-control-bar { 
+            background: var(--glass); border: 1px solid var(--glass-border);
+            border-radius: 30px; padding: 18px 25px; margin-bottom: 50px; 
+            display: flex; align-items: center; justify-content: space-between;
+            backdrop-filter: blur(15px);
+        }
+        .play-pause-btn { 
+            width: 50px; height: 50px; background: var(--gold); 
+            border-radius: 50%; display: flex; align-items: center; 
+            justify-content: center; color: var(--bg-dark); cursor: pointer;
+            box-shadow: 0 0 15px var(--accent-glow); transition: 0.3s;
+        }
+
+        .gallery-card { 
+            background: var(--glass); border-radius: 35px; 
+            border: 1px solid var(--glass-border); margin-bottom: 50px; 
+            overflow: hidden; backdrop-filter: blur(10px);
+        }
+        .gallery-text { padding: 30px; font-size: 17px; font-weight: 600; line-height: 1.8; color: rgba(234, 234, 234, 0.95); }
+
+        .btn-gold { 
+            background: linear-gradient(135deg, #F4C430, #d4af37); 
+            color: var(--bg-dark); border: none; padding: 20px 50px; 
+            border-radius: 50px; font-weight: 900; cursor: pointer; 
+            font-size: 19px; box-shadow: 0 15px 30px rgba(244, 196, 48, 0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        input { 
+            width: 100%; padding: 18px; margin: 25px 0; border-radius: 20px; 
+            border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); 
+            color: white; text-align: center; outline: none; font-size: 17px; font-weight: 600;
+        }
+
+        #final-popup { 
+            display: none; position: fixed; inset: 0; background: rgba(3, 7, 18, 0.9); z-index: 2000; 
+            align-items: center; justify-content: center; padding: 25px; opacity: 0; 
+            transition: 0.8s ease; backdrop-filter: blur(15px);
+        }
+        .popup-content { 
+            background: linear-gradient(145deg, #161d31, #0b132b); 
+            border: 1px solid var(--gold); border-radius: 45px; 
+            padding: 50px 20px; text-align: center; width: 95%; max-width: 440px;
+        }
+        .popup-title {
+            color: var(--gold); margin-bottom: 25px; font-size: clamp(16px, 5vw, 24px); 
+            font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        /* --- لوحة التحكم المتطورة --- */
+        #admin-panel {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at top, #161d31, #0B132B); 
+            z-index: 9999; display: none;
+            flex-direction: column; padding: 0; overflow-y: auto; color: white;
+            animation: fadeIn 0.5s ease;
+        }
+        .admin-header {
+            padding: 30px 20px; background: rgba(0,0,0,0.2); 
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .admin-container { padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; }
+        .admin-item { 
+            background: var(--glass); padding: 20px; border-radius: 25px; 
+            margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+        .admin-item:hover { border-color: var(--gold); background: rgba(255,255,255,0.07); }
+        .admin-item label { 
+            display: flex; align-items: center; gap: 10px; margin-bottom: 12px; 
+            color: var(--gold); font-weight: bold; font-size: 15px; 
+        }
+        .admin-input { 
+            width: 100%; padding: 14px; border-radius: 12px; 
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); 
+            color: #fff; font-family: inherit; transition: 0.3s;
+        }
+        .admin-input:focus { border-color: var(--gold); outline: none; background: rgba(0,0,0,0.4); }
+        .admin-btns { display: flex; gap: 10px; margin-top: 15px; }
+        .save-btn { 
+            background: var(--success); color: white; border: none; padding: 12px; 
+            border-radius: 12px; flex: 2; cursor: pointer; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .del-btn { 
+            background: var(--danger); color: white; border: none; padding: 12px; 
+            border-radius: 12px; flex: 1; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <canvas id="stars-canvas"></canvas>
+
+    <section id="page-1">
+        <div class="intro-decoration">
+            <div class="dec-item" style="left: 5%;"><div class="dec-line" style="height: 110px;"></div><i class="fa-solid fa-star"></i></div>
+            <div class="dec-item" style="left: 25%;"><div class="dec-line" style="height: 160px;"></div><i class="fa-solid fa-lightbulb"></i></div>
+            <div class="dec-item" style="left: 50%;"><div class="dec-line" style="height: 90px;"></div><i class="fa-solid fa-moon"></i></div>
+            <div class="dec-item" style="left: 75%;"><div class="dec-line" style="height: 140px;"></div><i class="fa-solid fa-lightbulb"></i></div>
+            <div class="dec-item" style="left: 95%;"><div class="dec-line" style="height: 100px;"></div><i class="fa-solid fa-star"></i></div>
+        </div>
+
+        <div class="login-card animate__animated animate__fadeInUp">
+            <i class="fa-solid fa-moon" style="font-size: 60px; color: var(--gold); margin-bottom: 20px; display: block; filter: drop-shadow(0 0 15px var(--gold));"></i>
+            <h1 id="main-title" onclick="adminTrigger()" style="color: var(--gold); font-weight: 800; margin: 0; font-size: 30px; cursor: pointer;">رمضان كريم ✨</h1>
+            <div id="intro-rhyme-text" class="intro-rhyme">قبل الشوربة والسمبوسة لك ألف بوسه، وكل رمضان وانت بخير قبل الحوسه</div>
+            <input type="text" id="passInput" placeholder="اكتبي التاريخ السري (19/2)">
+            <button class="btn-gold" style="width: 100%;" onclick="checkPass()">افتح هديتك 🎁</button>
+        </div>
+    </section>
+
+    <section id="page-2">
+        <div class="container">
+            <div class="reveal">
+                <div id="countdown-title-text" class="countdown-title">باقي على رمضان ❤️🌙</div>
+                <div class="timer-grid">
+                    <div class="timer-box"><span id="days" class="timer-num">--</span><span style="font-size: 12px; font-weight: bold; opacity: 0.8;">يوم</span></div>
+                    <div class="timer-box"><span id="hours" class="timer-num">--</span><span style="font-size: 12px; font-weight: bold; opacity: 0.8;">ساعة</span></div>
+                    <div class="timer-box"><span id="mins" class="timer-num">--</span><span style="font-size: 12px; font-weight: bold; opacity: 0.8;">دقيقة</span></div>
+                    <div class="timer-box"><span id="secs" class="timer-num">--</span><span style="font-size: 12px; font-weight: bold; opacity: 0.8;">ثانية</span></div>
+                </div>
+            </div>
+
+            <div class="main-img-box reveal">
+                <img id="hero-img" src="https://files.catbox.moe/1kauvu.jpg">
+            </div>
+
+            <div class="music-control-bar reveal">
+                <div style="text-align: right;">
+                    <div id="music-title-text" style="font-size: 17px; font-weight: 900; color: var(--gold);">صوت الروح 🎵</div>
+                    <div id="music-sub-text" style="font-size: 13px; opacity: 0.7;">هدية خاصة عشانك</div>
+                </div>
+                <div class="play-pause-btn" onclick="toggleMusic()"><i id="mIcon" class="fa-solid fa-pause"></i></div>
+                <audio id="bgMusic" loop src="https://files.catbox.moe/ms3fl8.mp3"></audio>
+            </div>
+
+            <div id="rhyme-msg-text" class="rhyme-msg reveal" style="font-size: 20px; font-weight: 600; margin-bottom: 60px; line-height: 1.8; font-style: italic; color: var(--soft-white);">
+                "قبل الشوربة والسمبوسة لك ألف بوسه، وكل رمضان وانت بخير قبل الحوسه"
+            </div>
+
+            <div id="gallery-area">
+                <div class="gallery-card reveal">
+                    <img id="g1-img" src="https://files.catbox.moe/y8xj6a.jpg" style="width:100%">
+                    <div id="g1-text" class="gallery-text">برمضان أهنئك ومن أنهار الجنة ربي يسقيني ويسقيك، ويجعل فيها نصيب ليا وليك.♥🌚</div>
+                </div>
+                <div class="gallery-card reveal">
+                    <img id="g2-img" src="https://files.catbox.moe/n3r1st.jpg" style="width:100%">
+                    <div id="g2-text" class="gallery-text">ما باقي إلا أيام معدودة وتطوى صفحة من الزمان ويبدأ رمضان، كل عام وأنتم بخير يا نبضات قلبي.</div>
+                </div>
+                <div class="gallery-card reveal">
+                    <img id="g3-img" src="https://files.catbox.moe/sdy1ut.jpg" style="width:100%">
+                    <div id="g3-text" class="gallery-text">يا طيور الحب زوريهم وعلى الخدود بوسيهم وعلى قلبي وصيهم وبقرب رمضان هنيهم.</div>
+                </div>
+                <div class="gallery-card reveal">
+                    <img id="g4-img" src="https://files.catbox.moe/y8xj6a.jpg" style="width:100%">
+                    <div id="g4-text" class="gallery-text">رمضان أحلى معاك يا ست البنات، كل سنة وانتي منورة دنيتي.</div>
+                </div>
+                <div class="gallery-card reveal">
+                    <img id="g5-img" src="https://files.catbox.moe/n3r1st.jpg" style="width:100%">
+                    <div id="g5-text" class="gallery-text">ربنا يتقبل منك الصيام والقيام، ويحفظك ليا يا أجمل ما في الأيام.</div>
+                </div>
+                <div class="gallery-card reveal">
+                    <img id="g6-img" src="https://files.catbox.moe/sdy1ut.jpg" style="width:100%">
+                    <div id="g6-text" class="gallery-text">كل رمضان وإحنا مع بعض، مكملين المشوار ومجمعين في الخير دايماً.</div>
+                </div>
+            </div>
+
+            <div class="reveal" style="margin-top: 60px; padding-bottom: 80px;">
+                <button class="btn-gold" onclick="showFinal()">دوسي هنا للأخير ♥😂</button>
+            </div>
+        </div>
+    </section>
+
+    <div id="final-popup" onclick="closePopup()">
+        <div class="popup-content" onclick="event.stopPropagation()">
+            <h2 id="pop-title-text" class="popup-title">كل سنه وانتي طيبه ي نن عيني</h2>
+            <p id="pop-msg-text" style="line-height: 2; font-size: 19px; font-weight: 600; opacity: 0.95;">
+                ‏انتي معايا وجنبي ومنوره حياتي الحلوه كل سنه واحنا مع بعض في كل حاجه ومكملين يا عمري كله 🫂💗🌎
+            </p>
+            <button class="btn-gold" style="margin-top: 35px; width: auto; padding: 15px 40px;" onclick="closePopup()">أمين يا رب ❤️</button>
+        </div>
+    </div>
+
+    <div id="admin-panel">
+        <div class="admin-header">
+            <h2 style="margin:0; color: var(--gold); font-size: 22px;"><i class="fa-solid fa-gears"></i> لوحة التحكم</h2>
+            <button onclick="closeAdmin()" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="admin-container">
+            <div id="admin-list"></div>
+            <div style="padding: 20px 0;">
+                <button class="btn-gold" onclick="closeAdmin()" style="width: 100%;">حفظ وإغلاق اللوحة</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // العداد هينتهي بكرة (19 فبراير 2026)
+        const editableElements = [
+            { id: 'main-title', type: 'text', label: 'العنوان الرئيسي', icon: 'fa-heading' },
+            { id: 'intro-rhyme-text', type: 'text', label: 'نص التهنئة الأول', icon: 'fa-quote-right' },
+            { id: 'passKey', type: 'text', label: 'الباسورد السري', val: '19/2', icon: 'fa-key' },
+            { id: 'countdown-title-text', type: 'text', label: 'عنوان العداد', icon: 'fa-clock' },
+            { id: 'targetDate', type: 'text', label: 'تاريخ رمضان', val: 'February 19, 2026 00:00:00', icon: 'fa-calendar-days' },
+            { id: 'hero-img', type: 'img', label: 'رابط الصورة الكبيرة', icon: 'fa-image' },
+            { id: 'bgMusic', type: 'audio', label: 'رابط الموسيقى', icon: 'fa-music' },
+            { id: 'rhyme-msg-text', type: 'text', label: 'رسالة تحت الموسيقى', icon: 'fa-envelope-open-text' },
+            { id: 'g1-img', type: 'img', label: 'صورة المعرض 1', icon: 'fa-image' }, { id: 'g1-text', type: 'text', label: 'نص 1', icon: 'fa-comment' },
+            { id: 'g2-img', type: 'img', label: 'صورة المعرض 2', icon: 'fa-image' }, { id: 'g2-text', type: 'text', label: 'نص 2', icon: 'fa-comment' },
+            { id: 'g3-img', type: 'img', label: 'صورة المعرض 3', icon: 'fa-image' }, { id: 'g3-text', type: 'text', label: 'نص 3', icon: 'fa-comment' },
+            { id: 'g4-img', type: 'img', label: 'صورة المعرض 4', icon: 'fa-image' }, { id: 'g4-text', type: 'text', label: 'نص 4', icon: 'fa-comment' },
+            { id: 'g5-img', type: 'img', label: 'صورة المعرض 5', icon: 'fa-image' }, { id: 'g5-text', type: 'text', label: 'نص 5', icon: 'fa-comment' },
+            { id: 'g6-img', type: 'img', label: 'صورة المعرض 6', icon: 'fa-image' }, { id: 'g6-text', type: 'text', label: 'نص 6', icon: 'fa-comment' },
+            { id: 'pop-title-text', type: 'text', label: 'عنوان الرسالة الأخيرة', icon: 'fa-heart' },
+            { id: 'pop-msg-text', type: 'text', label: 'نص الرسالة الأخيرة', icon: 'fa-heart-pulse' }
+        ];
+
+        function initAdmin() {
+            const list = document.getElementById('admin-list');
+            editableElements.forEach(item => {
+                const saved = localStorage.getItem(item.id);
+                if(saved) applyValue(item.id, saved, item.type);
+
+                const div = document.createElement('div');
+                div.className = 'admin-item';
+                div.innerHTML = `
+                    <label><i class="fa-solid ${item.icon || 'fa-pen-to-square'}"></i> ${item.label}</label>
+                    <input class="admin-input" id="admin-inp-${item.id}" value="${saved || (item.val || document.getElementById(item.id)?.innerText || document.getElementById(item.id)?.src || '')}">
+                    <div class="admin-btns">
+                        <button class="save-btn" onclick="saveItem('${item.id}', '${item.type}')"><i class="fa-solid fa-check"></i> حفظ</button>
+                        <button class="del-btn" onclick="resetItem('${item.id}', '${item.type}')"><i class="fa-solid fa-rotate-left"></i></button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function saveItem(id, type) {
+            const val = document.getElementById('admin-inp-' + id).value;
+            localStorage.setItem(id, val);
+            applyValue(id, val, type);
+            // إضافة تأثير بسيط عند الحفظ
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "تم الحفظ ✓";
+            setTimeout(() => btn.innerHTML = originalText, 1500);
+        }
+
+        function resetItem(id, type) {
+            if(confirm("هل تريد استعادة الشكل الأصلي لهذا الحقل؟")) {
+                localStorage.removeItem(id);
+                location.reload();
+            }
+        }
+
+        function applyValue(id, val, type) {
+            const el = document.getElementById(id);
+            if(!el && id !== 'passKey' && id !== 'targetDate') return;
+            if(type === 'text') el.innerText = val;
+            if(type === 'img' || type === 'audio') el.src = val;
+        }
+
+        let clicks = 0;
+        function adminTrigger() {
+            clicks++;
+            if(clicks >= 5) {
+                clicks = 0;
+                if(prompt("كلمة السر:") === "11") document.getElementById('admin-panel').style.display = 'flex';
+            }
+        }
+        function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
+
+        const canvas = document.getElementById('stars-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function initStars() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            for(let i = 0; i < 150; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2,
+                    speed: Math.random() * 0.5 + 0.2
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#FFF";
+            stars.forEach(s => {
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+                s.y += s.speed;
+                if(s.y > canvas.height) s.y = -5;
+            });
+            requestAnimationFrame(drawStars);
+        }
+
+        window.addEventListener('resize', initStars);
+        initStars();
+        drawStars();
+
+        function startTimer() {
+            const tDateStr = localStorage.getItem('targetDate') || "February 19, 2026 00:00:00";
+            const targetDate = new Date(tDateStr).getTime();
+            
+            setInterval(() => {
+                const now = new Date().getTime();
+                const distance = targetDate - now;
+                if (distance < 0) {
+                    document.getElementById('countdown-title-text').innerText = "رمضان مبارك! 🌙";
+                    return;
+                }
+                document.getElementById('days').innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
+                document.getElementById('hours').innerText = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                document.getElementById('mins').innerText = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                document.getElementById('secs').innerText = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+            }, 1000);
+        }
+
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            var windowHeight = window.innerHeight;
+            reveals.forEach(el => {
+                var elementTop = el.getBoundingClientRect().top;
+                if (elementTop < windowHeight - 80) el.classList.add("active");
+            });
+        }
+
+        function checkPass() {
+            const correctPass = localStorage.getItem('passKey') || "19/2";
+            if(document.getElementById('passInput').value === correctPass) {
+                document.getElementById('bgMusic').play();
+                const p1 = document.getElementById('page-1');
+                const p2 = document.getElementById('page-2');
+                p1.style.filter = 'blur(20px)';
+                p1.style.transform = 'scale(0.8)';
+                p1.style.opacity = '0';
+                setTimeout(() => {
+                    p1.style.display = 'none';
+                    p2.style.display = 'block';
+                    setTimeout(() => { 
+                        p2.style.opacity = '1'; 
+                        p2.style.transform = 'scale(1)'; 
+                        p2.style.filter = 'blur(0)';
+                        reveal(); 
+                    }, 50);
+                    startTimer();
+                }, 1000);
+            } else { alert("ركزي في التاريخ يا ست الكل 😂❤️"); }
+        }
+
+        function toggleMusic() {
+            const audio = document.getElementById('bgMusic');
+            const icon = document.getElementById('mIcon');
+            if (audio.paused) { audio.play(); icon.className = 'fa-solid fa-pause'; }
+            else { audio.pause(); icon.className = 'fa-solid fa-play'; }
+        }
+
+        function showFinal() {
+            const popup = document.getElementById('final-popup');
+            popup.style.display = 'flex';
+            setTimeout(() => popup.style.opacity = '1', 10);
+        }
+        function closePopup() {
+            const popup = document.getElementById('final-popup');
+            popup.style.opacity = '0';
+            setTimeout(() => popup.style.display = 'none', 800);
+        }
+        document.getElementById('page-2').addEventListener('scroll', reveal);
+        initAdmin();
+    </script>
+</body>
+</html>
